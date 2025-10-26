@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-const StackedClassCard = ({ classes, onClassClick, onRemoveClass }) => {
+const StackedClassCard = ({ classes, onClassClick, onRemoveClass, onCheckIn, removingId }) => {
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
   // local copy so component can remove items if parent doesn't manage them
   const [localClasses, setLocalClasses] = useState(classes || []);
   const [removingIds, setRemovingIds] = useState([]);
+  
+  // Update local classes when prop changes or when class is being removed
+  useEffect(() => {
+    if (removingId) {
+      setRemovingIds(prev => [...prev, removingId]);
+    }
+  }, [removingId]);
 
   if (!classes || classes.length === 0) {
     return (
@@ -114,12 +121,14 @@ const StackedClassCard = ({ classes, onClassClick, onRemoveClass }) => {
           return (
             <div
               key={classData.id}
-              className={`relative transition-all duration-500 cursor-pointer ${isRemoving ? 'translate-x-48 opacity-0' : ''} ${
-                isExpanded ? 'hover:scale-105' : 'hover:scale-102'
-              }`}
+              className={`relative transition-all duration-1000 ease-in-out ${
+                !isRemoving && 'cursor-pointer'
+              } ${isExpanded && !isRemoving ? 'hover:scale-105' : !isRemoving ? 'hover:scale-102' : ''}`}
               style={{
-                transform: showMore ? undefined : `translateY(${stackOffset}px) scale(${scale})`,
-                opacity: opacity,
+                transform: isRemoving 
+                  ? 'translateX(200%) rotate(12deg)' 
+                  : (showMore ? undefined : `translateY(${stackOffset}px) scale(${scale})`),
+                opacity: isRemoving ? 0 : opacity,
                 zIndex: zIndex,
                 marginTop: showMore ? (index === 0 ? '0' : '0.5rem') : undefined,
               }}
@@ -188,40 +197,27 @@ const StackedClassCard = ({ classes, onClassClick, onRemoveClass }) => {
                   )}
                 </div>
 
-                {/* Expanded Content */}
-                {isExpanded && (
+                {/* Expanded Content - Check-in button */}
+                {isExpanded && onCheckIn && (
                   <div className="mt-4 pt-4 border-t border-gray-600/30">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-400">
-                        {localClasses.length} classes today
-                      </span>
-                      <div className="flex space-x-2">
-                        {status.status === 'current' && (
-                          <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg transition-colors">
-                            Mark Present
-                          </button>
-                        )}
-                        <button className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded-lg transition-colors">
-                          Details
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDone(classData.id); }}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors"
-                        >
-                          Done
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCheckIn(classData);
+                      }}
+                      className="w-full px-4 py-2 bg-vibrant-green hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+                    >
+                      Check-in
+                    </button>
                   </div>
                 )}
               </div>
             </div>
           );
-        })}
+          })}
         </div>
       </div>
-
-      {/* Stack Indicator */}
+      
       {localClasses.length > 1 && (
         <div className="flex justify-center mt-4 space-x-2">
           {localClasses.map((_, index) => (

@@ -15,6 +15,8 @@ const LandingPage = () => {
   const [todayClasses, setTodayClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('home')
+  const [checkInSuccess, setCheckInSuccess] = useState({ visible: false, message: '', classId: null })
+  const [checkInError, setCheckInError] = useState({ visible: false, message: '' })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -68,6 +70,56 @@ const LandingPage = () => {
     // You can add more functionality here, like showing class details
   }
 
+  const handleCheckIn = (classData) => {
+    console.log('Check-in button pressed for class:', classData);
+    
+    // Call the Flask API for attendance tracking
+    fetch('http://localhost:5001/api/check-in', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ classData })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Attendance tracking response:', data);
+        if (data.success) {
+          // Show success UI immediately
+          setCheckInSuccess({ visible: true, message: data.message, classId: classData.id })
+          
+          // Start the swoosh animation immediately by marking as removing
+          // Keep the card in place to animate
+          
+          // Hide popup after 1 second
+          setTimeout(() => {
+            setCheckInSuccess({ visible: false, message: '', classId: null })
+          }, 1000)
+          
+          // Remove the class AFTER animation completes (1.2 seconds to let animation finish)
+          setTimeout(() => {
+            setTodayClasses(prev => prev.filter(c => c.id !== classData.id))
+          }, 1200)
+        } else {
+          // Show error UI
+          setCheckInError({ visible: true, message: data.message })
+          
+          // Hide error UI after 2 seconds
+          setTimeout(() => {
+            setCheckInError({ visible: false, message: '' })
+          }, 2000)
+        }
+      })
+      .catch((error) => {
+        console.error('Error during check-in:', error);
+        // Show error UI for network errors
+        setCheckInError({ visible: true, message: 'Check-in failed. Please try again or ensure the backend server is running.' })
+        
+        // Hide error UI after 2 seconds
+        setTimeout(() => {
+          setCheckInError({ visible: false, message: '' })
+        }, 2000)
+      });
+  };
+
   if (loading) {
     return (
       <MobileFrame>
@@ -104,6 +156,24 @@ const LandingPage = () => {
           </div>
         </div>
 
+        {/* Success UI - Small compact popup */}
+        {checkInSuccess.visible && (
+          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="bg-green-500 rounded-lg px-6 py-2 shadow-lg">
+              <p className="text-white font-bold text-sm">✅ Success</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error UI - Small compact popup */}
+        {checkInError.visible && (
+          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-50">
+            <div className="bg-red-500 rounded-lg px-6 py-2 shadow-lg">
+              <p className="text-white font-bold text-sm">❌ Failed</p>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="relative z-10 h-full flex flex-col p-3">
           {/* App Header (mobile style) */}
@@ -130,6 +200,8 @@ const LandingPage = () => {
                 <StackedClassCard
                   classes={todayClasses}
                   onClassClick={handleClassClick}
+                  onCheckIn={handleCheckIn}
+                  removingId={checkInSuccess.classId}
                 />
               </div>
             </div>
