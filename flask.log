@@ -218,3 +218,9 @@
 127.0.0.1 - - [26/Oct/2025 03:19:45] "OPTIONS /api/check-in HTTP/1.1" 200 -
 127.0.0.1 - - [26/Oct/2025 03:19:45] "POST /api/check-in HTTP/1.1" 200 -
 127.0.0.1 - - [26/Oct/2025 03:24:12] "[33mGET /api/assignments/today?date=2025-10-26 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [26/Oct/2025 04:10:21] "OPTIONS /api/check-in HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2025 04:10:21] "POST /api/check-in HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2025 04:10:24] "POST /api/check-in HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2025 04:45:03] "OPTIONS /api/check-in HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2025 04:45:03] "POST /api/check-in HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2025 04:45:05] "POST /api/check-in HTTP/1.1" 200 -
