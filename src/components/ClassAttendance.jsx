@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import AssignmentsToday from './AssignmentsToday';
 
 const ClassAttendance = () => {
   const [classes, setClasses] = useState([]);
@@ -178,6 +179,9 @@ const ClassAttendance = () => {
           })
         )}
       </div>
+
+  {/* Assignments for selected date (fetched from Canvas via backend) */}
+  <AssignmentsToday date={selectedDate} />
 
       {/* Summary Stats */}
       {classes.length > 0 && (
